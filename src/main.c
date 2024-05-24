@@ -27,7 +27,7 @@ int main(void)
 
     init();
 
-    while (1) {
+    while (0) {
 #if defined (BTN_PORT) && defined (BTN_PIN)
         if (milis() - time > 333 && !PUSH(BTN)) {
 #else
