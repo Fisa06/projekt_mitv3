@@ -6,7 +6,7 @@
 #endif
 
 #include "stm8s.h"
-
+void delay_ns(uint8_t ns);
 void delay_us(uint8_t us);
 void delay_ms(uint16_t us);
 /* 
