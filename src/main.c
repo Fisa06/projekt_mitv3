@@ -6,6 +6,7 @@
 #include "milis.h"
 #include "delay.h"
 #include "main.h"
+#include "stdio.h"
 
 #define L_PULSE 6 // 6*1/16MHz = 6*62.5 = 375ns (~400ns)
 #define H_PULSE 12 // 12*1/16MHz = 12*62.5 = 750ns (~800ns)
@@ -153,6 +154,11 @@ uint8_t colorsos[64*3]={
     0xff,0xff,0x00, // B
     };
 
+uint8_t colors2[64*3]={
+    0xff,0x00,0x00, // B
+    0x00,0xff,0x00, // R
+     // B
+    };
 
 uint32_t colorss[64]={
     0xff0000, // R
@@ -160,18 +166,40 @@ uint32_t colorss[64]={
     0x0000ff, // B
 };
 
+
+
 void main(void){
     CLK_HSIPrescalerConfig(CLK_PRESCALER_HSIDIV1); // 16MHz from internal RC
     init_milis(); // millis using TIM4 - not necessary
     init_tim();
-
+    uint8_t out[192];
+    uint8_t g = 0x00;
+    uint8_t r = 0x00;
+    uint8_t b = 0x00;
+    for(uint8_t i = 0; i < 190; i = i +3 ){
+        out[i] = r;
+        out[i+1] = g;
+        out[i+2] = b;
+    }
+    uint8_t out2[192];
+    uint8_t g2 = 0xff;
+    uint8_t r2 = 0xff;
+    uint8_t b2 = 0xff;
+    for(uint8_t i = 0; i < 190; i = i +3 ){
+        out2[i] = r2;
+        out2[i+1] = g2;
+        out2[i+2] = b2;
+    }
     while (1){
-        test(colors,sizeof(colors));
-        delay_ms(40);
-        test(colorsos,sizeof(colorsos));
-        delay_ms(40);
+        test(out,sizeof(out));
+        delay_ms(20);
+        test(out2,sizeof(out2));
+        delay_ms(20);
+        //test(colorsos,sizeof(colorsos));
+       // delay_ms(40);
     }
 }
+
 
 void init_tim(void){
     GPIO_Init(GPIOC,GPIO_PIN_1,GPIO_MODE_OUT_PP_LOW_FAST); // PC1 (TIM1_CH1)
@@ -229,3 +257,6 @@ void test2(uint32_t* data, uint16_t length){
 
     enableInterrupts();
 }
+
+
+
