@@ -7,13 +7,16 @@
 #include "delay.h"
 #include "main.h"
 #include "stdio.h"
-
 #define L_PULSE 6 // 6*1/16MHz = 6*62.5 = 375ns (~400ns)
 #define H_PULSE 12 // 12*1/16MHz = 12*62.5 = 750ns (~800ns)
 
 void test(uint8_t* data, uint16_t length);
 void test2(uint32_t* data, uint16_t length);
+void fill_with_color(uint8_t r, uint16_t g, uint8_t b, uint8_t n_leds);
+uint32_t merge(uint8_t r, uint8_t g, uint8_t b);
 void init_tim(void);
+void fill_with_color_hex(uint32_t hex, uint8_t n_leds);
+void let_that_sink_in(uint32_t data[64]);
 uint8_t colors[64*3]={
     0xff,0x00,0x00, // B
     0xff,0x00,0x00, // R
@@ -51,7 +54,8 @@ uint8_t colors[64*3]={
     0xff,0x00,0x00, // B
     0xff,0x00,0x00, // R
     0xff,0x00,0x00,
-    0xff,0x00,0x00, // B
+    0xff,
+    0x00,0x00, // B
     0xff,0x00,0x00, // R
     0xff,0x00,0x00,
     0xff,0x00,0x00, // B
@@ -172,33 +176,59 @@ void main(void){
     CLK_HSIPrescalerConfig(CLK_PRESCALER_HSIDIV1); // 16MHz from internal RC
     init_milis(); // millis using TIM4 - not necessary
     init_tim();
-    uint8_t out[192];
-    uint8_t g = 0x00;
-    uint8_t r = 0x00;
-    uint8_t b = 0x00;
-    for(uint8_t i = 0; i < 190; i = i +3 ){
-        out[i] = r;
-        out[i+1] = g;
-        out[i+2] = b;
+    uint8_t lol[64] = {0};
+    for (uint8_t i = 1; i < 64; i= i+3) {
+
+        lol[i] = 1;
     }
-    uint8_t out2[192];
-    uint8_t g2 = 0xff;
-    uint8_t r2 = 0xff;
-    uint8_t b2 = 0xff;
-    for(uint8_t i = 0; i < 190; i = i +3 ){
-        out2[i] = r2;
-        out2[i+1] = g2;
-        out2[i+2] = b2;
+    uint32_t color = 0xff00ff;
+    uint32_t out[64] = {0};
+    for(uint8_t i = 0; i < 64; i++){
+        if(lol[i]){
+            out[i] = color;
+        }
     }
-    while (1){
-        test(out,sizeof(out));
-        delay_ms(20);
-        test(out2,sizeof(out2));
-        delay_ms(20);
+
+    uint8_t lol2[64] = {0};
+    for (uint8_t i = 0; i < 64; i= i+3) {
+        lol2[i] = 1;
+    }
+    uint32_t color2 = 0x00ff00;
+    uint32_t out2[64] = {0};
+    for(uint8_t i = 0; i < 64; i++){
+        if(lol2[i]){
+            out2[i] = color2;
+        }
+    }
+    uint8_t lol3[64] = {0};
+    for (uint8_t i = 2; i < 64; i= i+3) {
+        lol3[i] = 1;
+    }
+    uint32_t color3 = 0x00ff0f;
+    uint32_t out3[64] = {0};
+    for(uint8_t i = 0; i < 64; i++){
+        if(lol3[i]){
+            out3[i] = color3;
+        }
+    }
+    while(1){
+    let_that_sink_in(out);
+    delay_ms(75);
+    let_that_sink_in(out2);
+    delay_ms(75);
+    let_that_sink_in(out3);
+    delay_ms(75);
+        //let_that_sink_in(lol);
+        //fill_with_color_hex(0xB6FF00,64);
+        //fill_with_color(32,128,32,64);
+        //test(out2,sizeof(out2));
+
+        //test(out2,sizeof(out2));
+        //delay_ms(15);
         //test(colorsos,sizeof(colorsos));
        // delay_ms(40);
-    }
-}
+
+}}
 
 
 void init_tim(void){
@@ -209,10 +239,10 @@ void init_tim(void){
                  1, TIM1_OCPOLARITY_HIGH, TIM1_OCNPOLARITY_HIGH, TIM1_OCIDLESTATE_SET,
                  TIM1_OCNIDLESTATE_RESET);
     TIM1_CtrlPWMOutputs(ENABLE); // Timer output global enable
-    TIM1_SelectOnePulseMode(TIM1_OPMODE_SINGLE); // Selecting One Pulse Mode
+    TIM1_Select
+        OnePulseMode(TIM1_OPMODE_SINGLE); // Selecting One Pulse Mode
 }
 
-// takes array of LED_number * 3 bytes (RGB per LED)
 void test(uint8_t* data, uint16_t length){
     uint8_t mask;
     disableInterrupts(); // can be omitted if interrupts do not take more then about ~25us
@@ -234,15 +264,66 @@ void test(uint8_t* data, uint16_t length){
     enableInterrupts();
 }
 
+uint32_t merge(uint8_t r, uint8_t g, uint8_t b){
+    return ((uint32_t)r << 16) | ((uint32_t)g << 8) | (uint32_t)b;
+}
 
 
-void test2(uint32_t* data, uint16_t length){
-    length = length * 4;
+
+void fill_with_color(uint8_t r, uint16_t g, uint8_t b, uint8_t n_leds){
+    uint32_t data =  merge(r,g,b);
+    uint32_t mask;
+    disableInterrupts(); // can be omitted if interrupts do not take more then about ~25us
+    while(n_leds){   // for all bytes from input array
+        n_leds--;
+        mask=0b100000000000000000000000; // for all bits in byte
+        while(mask){
+            while(TIM1->CR1 & TIM1_CR1_CEN); // wait if timer run (transmitting last bit)
+            if(mask & data){ // send pulse with coresponding length ("L" od "H")
+                TIM1->ARRL = H_PULSE; // set pulse width for "H" bit
+            }else{
+                TIM1->ARRL = L_PULSE; // set pulse width for "L" bit
+            }
+            TIM1->CR1 |= TIM1_CR1_CEN; // Start timer (start single pulse generation)
+            mask = mask >> 1;
+        }
+    }
+
+    enableInterrupts();
+}
+
+
+
+void fill_with_color_hex(uint32_t hex, uint8_t n_leds){
+    uint32_t mask;
+    disableInterrupts(); // can be omitted if interrupts do not take more then about ~25us
+    while(n_leds){   // for all bytes from input array
+        n_leds--;
+        mask=0b100000000000000000000000; // for all bits in byte
+        while(mask){
+            while(TIM1->CR1 & TIM1_CR1_CEN); // wait if timer run (transmitting last bit)
+            if(mask & hex){ // send pulse with coresponding length ("L" od "H")
+                TIM1->ARRL = H_PULSE; // set pulse width for "H" bit
+            }else{
+                TIM1->ARRL = L_PULSE; // set pulse width for "L" bit
+            }
+            TIM1->CR1 |= TIM1_CR1_CEN; // Start timer (start single pulse generation)
+            mask = mask >> 1;
+        }
+    }
+
+    enableInterrupts();
+}
+
+
+void let_that_sink_in(uint32_t data[64]){
+
+    uint8_t length = 64;
     uint32_t mask;
     disableInterrupts(); // can be omitted if interrupts do not take more then about ~25us
     while(length){   // for all bytes from input array
         length--;
-        mask= 0b100000000000000000000000; // for all bits in byte
+        mask=0b100000000000000000000000; // for all bits in byte
         while(mask){
             while(TIM1->CR1 & TIM1_CR1_CEN); // wait if timer run (transmitting last bit)
             if(mask & data[length]){ // send pulse with coresponding length ("L" od "H")
@@ -257,6 +338,13 @@ void test2(uint32_t* data, uint16_t length){
 
     enableInterrupts();
 }
+
+
+
+
+
+
+
 
 
 
