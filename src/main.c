@@ -61,8 +61,9 @@ void main(void){
     };
 
 
-    let_that_sink_in(values);
-    while(1){
+    //let_that_sink_in(values);
+
+
     //let_that_sink_in(out);
     //delay_ms(1);
     //let_that_sink_in(out2);
@@ -71,12 +72,21 @@ void main(void){
     //delay_ms(1);
     //color_fill_with_reverse_horizontal();
     //color_fill_with_reverse_vertical();
+    uint32_t grid1[64] = {0};
+    uint32_t result[64];
+
+    // Example usage
+    grid1[0] = 0x00ff00;  // Top-left corner, green
+    grid1[63] = 0xff0000; // Bottom-right corner, blue
+
+    generate_diagonal_gradient(grid1, result);
+    let_that_sink_in(result);
 
 
 
 
 
-    }
+
         //let_that_sink_in(lol);
         //fill_with_color_hex(0xB6FF00,64);
         //fill_with_color(32,128,32,64);
@@ -95,25 +105,7 @@ void main(void){
 //-----------------------------------------------------------------
 
 
-uint32_t hexToGRB(uint32_t rgb) {
 
-    uint8_t green = (rgb >> 7) & 0xFF;
-    uint8_t red = (rgb >> 15) & 0xFF;
-    uint8_t blue = rgb & 0xFF;
-    return (green << 15) | (red << 7) | blue;
-}
-
-// Function to generate the gradient colors
-void generateGradient(uint8_t startG, uint8_t startR, uint8_t startB,
-                      uint8_t endG, uint8_t endR, uint8_t endB, uint32_t gradient[64]) {
-    for (uint8_t i = 0; i < 64; i++) {
-        uint8_t intermediateG = (uint8_t)(startG + ((float)i / 63) * (endG - startG));
-        uint8_t intermediateR = (uint8_t)(startR + ((float)i / 63) * (endR - startR));
-        uint8_t intermediateB = (uint8_t)(startB + ((float)i / 63) * (endB - startB));
-
-        gradient[i] = (intermediateG << 16) | (intermediateR << 8) | intermediateB;
-    }
-}
 
 
 

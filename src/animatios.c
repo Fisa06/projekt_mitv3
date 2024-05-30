@@ -287,6 +287,67 @@ void color_fill_with_reverse_vertical(void) {
 }}
 
 
+uint32_t interpolate_color(uint32_t color1, uint32_t color2, float factor) {
+    uint8_t r1 = (color1 >> 16) & 0xFF;
+    uint8_t g1 = (color1 >> 8) & 0xFF;
+    uint8_t b1 = color1 & 0xFF;
+
+    uint8_t r2 = (color2 >> 16) & 0xFF;
+    uint8_t g2 = (color2 >> 8) & 0xFF;
+    uint8_t b2 = color2 & 0xFF;
+
+    uint8_t r = r1 + (r2 - r1) * factor;
+    uint8_t g = g1 + (g2 - g1) * factor;
+    uint8_t b = b1 + (b2 - b1) * factor;
+
+    return (r << 16) | (g << 8) | b;
+}
+
+void generate_diagonal_gradient(uint32_t* gridos, uint32_t* result) {
+    int pos1 = -1, pos2 = -1;
+    uint32_t color1, color2;
+
+    // Identify the set colors and their positions
+    for (uint8_t i = 0; i < 64; i++) {
+        if (gridos[i] != 0) {
+            if (pos1 == -1) {
+                pos1 = i;
+                color1 = gridos[i];
+            } else {
+                pos2 = i;
+                color2 = gridos[i];
+                break;
+            }
+        }
+    }
+
+
+    // Initialize the result grid with 0 values
+    for (uint8_t i = 0; i < 64; i++) {
+        result[i] = 0;
+    }
+
+    // Set the start and end colors
+    result[pos1] = color1;
+    result[pos2] = color2;
+
+    // Calculate the diagonal distances
+    uint8_t dist_x = abs((pos2 % 8) - (pos1 % 8));
+    uint8_t dist_y = abs((pos2 / 8) - (pos1 / 8));
+    uint8_t max_dist = dist_x > dist_y ? dist_x : dist_y;
+
+    for (uint8_t i = 0; i < 8; i++) {
+        for (uint8_t j = 0; j < 8; j++) {
+            uint8_t index = i * 8 + j;
+            if (result[index] == 0) {
+                float factor = (float)(i > j ? i : j) / max_dist;
+                result[index] = interpolate_color(color1, color2, factor);
+            }
+        }
+    }
+}
+
+
 
 
 
