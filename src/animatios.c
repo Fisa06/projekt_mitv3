@@ -1,3 +1,4 @@
+
 #include "animations.h"
 #include "stm8s.h"
 #include "neopixel.h"
@@ -40,7 +41,7 @@ void send22(uint8_t r_array[64], uint8_t g_array[64], uint8_t b_array[64]) {
     }
 
     let_that_sink_in(data);
-    delay_ms(20);
+    delay_ms(5);
 }
 
 
@@ -52,7 +53,7 @@ void send3(uint8_t r_array[64], uint8_t g_array[64], uint8_t b_array[64]) {
     transposeMatrix(data);
 
     let_that_sink_in(data);
-    delay_ms(70);
+    delay_ms(5);
 }
 
 
