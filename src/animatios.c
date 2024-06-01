@@ -3,8 +3,6 @@
 #include "stm8s.h"
 #include "neopixel.h"
 #include "delay.h"
-//------------------------------------------
-// send functions with different matrix transformations
 void send(uint8_t r_array[64], uint8_t g_array[64], uint8_t b_array[64]) {
     uint32_t data[64];
     for (uint8_t i = 0; i < 64; i++) {
@@ -87,6 +85,7 @@ void transposeMatrix(uint32_t *array) {
         }
     }
 }
+
 
 //------------------------------------------
 
@@ -286,26 +285,43 @@ void color_fill_with_reverse_vertical(void) {
     }
 }}
 
+void rotate90Clockwise(uint32_t matrix[64]) {
+    uint32_t temp[64];
+
+    // Copy the rotated values into a temporary array
+    for (uint8_t i = 0; i < 8; i++) {
+        for (uint8_t j = 0; j < 8; j++) {
+            temp[j * 8 + (7 - i)] = matrix[i * 8 + j];
+        }
+    }
+
+    // Copy the temporary array back to the original matrix
+    for (uint8_t i = 0; i < 64; i++) {
+        matrix[i] = temp[i];
+    }
+}
+
 
 uint32_t interpolate_color(uint32_t color1, uint32_t color2, float factor) {
-    uint8_t r1 = (color1 >> 16) & 0xFF;
-    uint8_t g1 = (color1 >> 8) & 0xFF;
+    uint8_t g1 = (color1 >> 16) & 0xFF;
+    uint8_t r1 = (color1 >> 8) & 0xFF;
     uint8_t b1 = color1 & 0xFF;
 
-    uint8_t r2 = (color2 >> 16) & 0xFF;
-    uint8_t g2 = (color2 >> 8) & 0xFF;
+    uint8_t g2 = (color2 >> 16) & 0xFF;
+    uint8_t r2 = (color2 >> 8) & 0xFF;
     uint8_t b2 = color2 & 0xFF;
 
-    uint8_t r = r1 + (r2 - r1) * factor;
     uint8_t g = g1 + (g2 - g1) * factor;
+    uint8_t r = r1 + (r2 - r1) * factor;
     uint8_t b = b1 + (b2 - b1) * factor;
 
-    return ((uint32_t)r << 16) | ((uint32_t)g << 8) | b;
+    return ((uint32_t)g << 16) | ((uint32_t)r << 8) | b;
 }
 
 void generate_diagonal_gradient(uint32_t* gridos, uint32_t* result) {
     int pos1 = -1, pos2 = -1;
-    uint32_t color1, color2;
+    uint32_t color2 = 0;
+    uint32_t color1 = 0;
 
     // Identify the set colors and their positions
     for (uint8_t i = 0; i < 64; i++) {
@@ -347,6 +363,140 @@ void generate_diagonal_gradient(uint32_t* gridos, uint32_t* result) {
         }
     }
 }
+
+
+
+
+void color_gradient_corner_effect(void) {
+    uint8_t i_red = 0;
+    uint8_t i_green = 0;
+    uint8_t i_blue = 0;
+
+#define speed_ms 1
+#define step 2
+#define red_offset -30
+#define green_offset 0
+#define blue_offset 0
+
+    // hihi();
+    uint32_t values[64] = {0};
+    uint32_t out[64];
+
+    for (uint8_t i = 0; i < 64; i += step) {
+        values[63] =
+            _merge((i + red_offset) < 0 ? 0 : (i + red_offset), 0, (127 - i));
+        values[0] = _merge(
+            (127 - i + red_offset) < 0 ? 0 : (127 - i + red_offset), 0, i);
+
+        generate_diagonal_gradient(values, out);
+
+        let_that_sink_in(out);
+        delay_ms(speed_ms);
+    }
+    for (uint8_t i = 64; i < 128; i += step) {
+
+        values[63] = _merge(
+            (127 - i + red_offset) < 0 ? 0 : (127 - i + red_offset), 0, i);
+        values[0] =
+            _merge((i + red_offset) < 0 ? 0 : (i + red_offset), 0, (127 - i));
+
+        generate_diagonal_gradient(values, out);
+        rotate90Clockwise(out);
+
+        let_that_sink_in(out);
+        delay_ms(speed_ms);
+    }
+    for (uint8_t i = 0; i < 64; i += step) {
+
+        values[63] =
+            _merge((i + red_offset) < 0 ? 0 : (i + red_offset), 0, (127 - i));
+        values[0] = _merge(
+            (127 - i + red_offset) < 0 ? 0 : (127 - i + red_offset), 0, i);
+
+        generate_diagonal_gradient(values, out);
+        rotate90Clockwise(out);
+        let_that_sink_in(out);
+        delay_ms(speed_ms);
+    }
+    for (uint8_t i = 64; i < 128; i += step) {
+
+        values[63] = _merge(
+            (127 - i + red_offset) < 0 ? 0 : (127 - i + red_offset), 0, i);
+        values[0] =
+            _merge((i + red_offset) < 0 ? 0 : (i + red_offset), 0, (127 - i));
+
+        generate_diagonal_gradient(values, out);
+        rotate90Clockwise(out);
+        rotate90Clockwise(out);
+
+        let_that_sink_in(out);
+        delay_ms(speed_ms);
+    }
+    for (uint8_t i = 0; i < 64; i += step) {
+
+        values[63] =
+            _merge((i + red_offset) < 0 ? 0 : (i + red_offset), 0, (127 - i));
+        values[0] = _merge(
+            (127 - i + red_offset) < 0 ? 0 : (127 - i + red_offset), 0, i);
+
+        generate_diagonal_gradient(values, out);
+        rotate90Clockwise(out);
+        rotate90Clockwise(out);
+        let_that_sink_in(out);
+        delay_ms(speed_ms);
+    }
+    for (uint8_t i = 64; i < 128; i += step) {
+
+        values[63] = _merge(
+            (127 - i + red_offset) < 0 ? 0 : (127 - i + red_offset), 0, i);
+        values[0] =
+            _merge((i + red_offset) < 0 ? 0 : (i + red_offset), 0, (127 - i));
+
+        generate_diagonal_gradient(values, out);
+        rotate90Clockwise(out);
+        rotate90Clockwise(out);
+        rotate90Clockwise(out);
+
+        let_that_sink_in(out);
+        delay_ms(speed_ms);
+    }
+    for (uint8_t i = 0; i < 64; i += step) {
+
+        values[63] =
+            _merge((i + red_offset) < 0 ? 0 : (i + red_offset), 0, (127 - i));
+        values[0] = _merge(
+            (127 - i + red_offset) < 0 ? 0 : (127 - i + red_offset), 0, i);
+
+        generate_diagonal_gradient(values, out);
+        rotate90Clockwise(out);
+        rotate90Clockwise(out);
+        rotate90Clockwise(out);
+        let_that_sink_in(out);
+        delay_ms(speed_ms);
+    }
+    for (uint8_t i = 64; i < 128; i += step) {
+
+        values[63] = _merge(
+            (127 - i + red_offset) < 0 ? 0 : (127 - i + red_offset), 0, i);
+        values[0] =
+            _merge((i + red_offset) < 0 ? 0 : (i + red_offset), 0, (127 - i));
+
+        generate_diagonal_gradient(values, out);
+        rotate90Clockwise(out);
+        rotate90Clockwise(out);
+        rotate90Clockwise(out);
+        rotate90Clockwise(out);
+
+        let_that_sink_in(out);
+        delay_ms(speed_ms);
+    }
+}
+
+
+
+
+
+
 
 
 

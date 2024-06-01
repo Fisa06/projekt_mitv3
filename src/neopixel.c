@@ -14,7 +14,7 @@ void init_tim(void){
 }
 
 uint32_t _merge(uint8_t r, uint8_t g, uint8_t b){
-    return ((uint32_t)r << 16) | ((uint32_t)g << 8) | (uint32_t)b;
+    return ((uint32_t)g << 16) | ((uint32_t)r << 8) | (uint32_t)b;
 }
 
 
