@@ -74,13 +74,67 @@ void main(void){
     //color_fill_with_reverse_vertical();
     uint32_t grid1[64] = {0};
     uint32_t result[64];
+    //fill_with_color_hex(0xffffff, 64);
 
+    while(1){
+    for(uint8_t i = 1; i < 128; i+=2){
     // Example usage
-    grid1[0] = 0x00ff00;  // Top-left corner, green
-    grid1[63] = 0xff0000; // Bottom-right corner, blue
+    grid1[0] = _merge(0,0,i);  // Top-left corner, green
+    grid1[63] = 0x008000; // Bottom-right corner, blue
 
     generate_diagonal_gradient(grid1, result);
     let_that_sink_in(result);
+        delay_ms(25);}
+        for(uint8_t i = 0; i < 128; i+=2){
+            // Example usage
+            grid1[0] = _merge(0,0,(127-i));  // Top-left corner, green
+            grid1[63] = 0x008000; // Bottom-right corner, blue
+
+            generate_diagonal_gradient(grid1, result);
+            let_that_sink_in(result);
+            delay_ms(25);
+    }
+    for(uint8_t i = 0; i < 128; i+=2){
+        // Example usage
+        grid1[0] = _merge(0,127,0);  // Top-left corner, green
+        grid1[63] = _merge(0,0,(127-i)); // Bottom-right corner, blue
+
+        generate_diagonal_gradient(grid1, result);
+        let_that_sink_in(result);
+        delay_ms(25);
+    }
+
+    for(uint8_t i = 1; i < 128; i+=2){
+        // Example usage
+        grid1[0] = _merge(0,0,127);  // Top-left corner, green
+        grid1[63] = _merge(0,i,0); // Bottom-right corner, blue
+
+        generate_diagonal_gradient(grid1, result);
+        let_that_sink_in(result);
+        delay_ms(25);}
+
+
+
+    for(uint8_t i = 0; i < 128; i+=2){
+        // Example usage
+        grid1[0] = _merge(0,0,(127-i));  // Top-left corner, green
+        grid1[63] = 0x008000; // Bottom-right corner, blue
+
+        generate_diagonal_gradient(grid1, result);
+        let_that_sink_in(result);
+        delay_ms(25);
+
+    }
+    for(uint8_t i = 1; i < 128; i+=2){
+        // Example usage
+        grid1[0] = _merge(0,0,i);  // Top-left corner, green
+        grid1[63] = 0x008000; // Bottom-right corner, blue
+
+        generate_diagonal_gradient(grid1, result);
+        let_that_sink_in(result);
+        delay_ms(25);}
+    }}
+
 
 
 
@@ -97,7 +151,7 @@ void main(void){
         //test(colorsos,sizeof(colorsos));
        // delay_ms(40);
 
-}
+
 
 
 

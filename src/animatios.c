@@ -300,7 +300,7 @@ uint32_t interpolate_color(uint32_t color1, uint32_t color2, float factor) {
     uint8_t g = g1 + (g2 - g1) * factor;
     uint8_t b = b1 + (b2 - b1) * factor;
 
-    return (r << 16) | (g << 8) | b;
+    return ((uint32_t)r << 16) | ((uint32_t)g << 8) | b;
 }
 
 void generate_diagonal_gradient(uint32_t* gridos, uint32_t* result) {
@@ -322,6 +322,7 @@ void generate_diagonal_gradient(uint32_t* gridos, uint32_t* result) {
     }
 
 
+
     // Initialize the result grid with 0 values
     for (uint8_t i = 0; i < 64; i++) {
         result[i] = 0;
@@ -340,7 +341,7 @@ void generate_diagonal_gradient(uint32_t* gridos, uint32_t* result) {
         for (uint8_t j = 0; j < 8; j++) {
             uint8_t index = i * 8 + j;
             if (result[index] == 0) {
-                float factor = (float)(i > j ? i : j) / max_dist;
+                float factor = (float)(i > j ? i : j) / (float)max_dist;
                 result[index] = interpolate_color(color1, color2, factor);
             }
         }
