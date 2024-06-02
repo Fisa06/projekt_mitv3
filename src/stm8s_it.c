@@ -27,7 +27,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm8s_it.h"
-
+#include "main.h"
 #include "milis.h"
 
 /* Private typedef -----------------------------------------------------------*/
@@ -69,7 +69,7 @@ INTERRUPT_HANDLER_TRAP(TRAP_IRQHandler)
   */
 }
 /**
-  * @brief  Top Level Interrupt routine
+  * @brief  Top LevelGPIO_Init(BTN_PORT, BTN_PIN, GPIO_MODE_IN_FL_NO_IT) Interrupt routine
   * @param  None
   * @retval None
   */

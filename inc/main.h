@@ -37,6 +37,6 @@
 #endif
 
 // functions
-void init(void);
+void in_it(void);
 
 #endif // !_MAIN_H_

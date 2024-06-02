@@ -24,5 +24,9 @@ void color_fill_with_reverse_vertical(void);
 
 
 void color_gradient_corner_effect(void);
+void draw_frame(int frame[8][8], uint32_t color3, uint32_t color2, uint32_t color1);
+
+
+void cross_animation(void);
 
 
