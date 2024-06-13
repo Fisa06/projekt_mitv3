@@ -10,6 +10,8 @@
 #include "neopixel.h"
 #include "animations.h"
 #include "conway.h"
+volatile bool break_flag = 0;
+
 
 
 void in_it(){
@@ -92,37 +94,6 @@ bool is_btn_pressed_event(void) // returns true if button one is pressed but not
 void main(void) {
     in_it();
 #define SIZE 8
-    int grid[SIZE][SIZE] = {
-        {0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 1, 1, 0, 0},
-        {0, 0, 0, 0, 0, 1, 0, 0},
-        {0, 0, 1, 0, 1, 0, 0, 0},
-        {0, 1, 0, 0, 0, 0, 0, 0},
-        {0, 1, 1, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, 0}
-    };
-    int grid2[SIZE][SIZE] = {
-        {0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0, 1, 0, 0, 0, 0},
-        {0, 0, 1, 1, 1, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, 0}
-    };
-    int grid3[SIZE][SIZE] = {
-        {0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0, 1, 0, 0, 0, 0},
-        {0, 0, 1, 1, 1, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, 0}
-    };
-
 
     // let_that_sink_in(values);
 
@@ -141,48 +112,90 @@ void main(void) {
     uint8_t state = 0;
     while (1) {
 
-        if (1) {
-            state++;
-            time = milis();
-            if (state > 5) {
-                state = 0;
-            }
-        }
-        switch(state){
+        switch (state) {
         case 0:
+            while (break_flag == 0) {
                 fill_with_color_hex(0x008000, 64);
-                break;
+                delay_ms(100);
+            }
+            break_flag = 0;
+            state = 1;
+            break;
         case 1:
+            while (break_flag == 0) {
                 fill_with_color_hex(0x000080, 64);
-                break;
+                delay_ms(100);
+            }
+            state = 2;
+            break_flag = 0;
+            break;
 
         case 2:
+            while (break_flag == 0) {
                 fill_with_color_hex(0x800000, 64);
-                break;
+                delay_ms(100);
+            }
+            state = 3;
+            break_flag = 0;
+            break;
         case 3:
+            while (break_flag == 0) {
                 color_gradient_corner_effect();
-                break;
+            }
+            state = 4;
+            break_flag = 0;
+            break;
+
         case 4:
-            for(uint8_t i = 0; i < 64; i++) {
+
+            while (break_flag == 0) {
                 cross_animation();
             }
+            state = 5;
+            break_flag = 0;
             break;
-case 5:
-    uint32_t array[64] = {0};
-    for (uint8_t i = 0; i < 20; i++) {
-        grid_to_1d_array(grid2, array, 0x008000, 0x000080);
-        let_that_sink_in(array);
-        update_grid(grid2);
-        delay_ms(250);
-    }
+        case 5:
+            while (break_flag == 0) {
+                int grid[SIZE][SIZE] = {
+                    {0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0},
+                    {0, 0, 0, 0, 1, 1, 0, 0}, {0, 0, 0, 0, 0, 1, 0, 0},
+                    {0, 0, 1, 0, 1, 0, 0, 0}, {0, 1, 0, 0, 0, 0, 0, 0},
+                    {0, 1, 1, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0}};
+                int grid2[SIZE][SIZE] = {
+                    {0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0},
+                    {0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 1, 0, 0, 0, 0},
+                    {0, 0, 1, 1, 1, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0},
+                    {0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0}};
+                int grid3[SIZE][SIZE] = {
+                    {0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0},
+                    {0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 1, 0, 0, 0, 0},
+                    {0, 0, 1, 1, 1, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0},
+                    {0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0}};
+                uint32_t array[64] = {0};
 
-    break;
+                for (uint8_t i = 0; i < 20; i++) {
+                    grid_to_1d_array(grid2, array, 0x008000, 0x000080);
+                    let_that_sink_in(array);
+                    update_grid(grid2);
+                    delay_ms(250);
+                    if(break_flag){
+                        break;
+                    }
+                }
+                state = 0;
+                break_flag = 0;
+                break;
+            }
         }
-
-
-
     }
 }
+
+
+INTERRUPT_HANDLER(EXTI_PORTE_IRQHandler, 7)
+{
+  break_flag = 1;
+}
+
     /*
 
 

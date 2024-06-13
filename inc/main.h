@@ -38,5 +38,6 @@
 
 // functions
 void in_it(void);
+extern volatile bool break_flag;
 
 #endif // !_MAIN_H_

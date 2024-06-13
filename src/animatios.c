@@ -1,4 +1,4 @@
-
+#include "main.h"
 #include "animations.h"
 #include "stm8s.h"
 #include "neopixel.h"
@@ -391,6 +391,9 @@ void color_gradient_corner_effect(void) {
         generate_diagonal_gradient(values, out);
 
         let_that_sink_in(out);
+        if(break_flag) {
+            return;
+        }
         delay_ms(speed_ms);
     }
     for (uint8_t i = 64; i < 128; i += step) {
@@ -404,6 +407,10 @@ void color_gradient_corner_effect(void) {
         rotate90Clockwise(out);
 
         let_that_sink_in(out);
+        if(break_flag) {
+
+            return;
+        }
         delay_ms(speed_ms);
     }
     for (uint8_t i = 0; i < 64; i += step) {
@@ -416,6 +423,10 @@ void color_gradient_corner_effect(void) {
         generate_diagonal_gradient(values, out);
         rotate90Clockwise(out);
         let_that_sink_in(out);
+        if(break_flag) {
+
+            return;
+        }
         delay_ms(speed_ms);
     }
     for (uint8_t i = 64; i < 128; i += step) {
@@ -430,6 +441,10 @@ void color_gradient_corner_effect(void) {
         rotate90Clockwise(out);
 
         let_that_sink_in(out);
+        if(break_flag) {
+
+            return;
+        }
         delay_ms(speed_ms);
     }
     for (uint8_t i = 0; i < 64; i += step) {
@@ -443,6 +458,10 @@ void color_gradient_corner_effect(void) {
         rotate90Clockwise(out);
         rotate90Clockwise(out);
         let_that_sink_in(out);
+        if(break_flag) {
+
+            return;
+        }
         delay_ms(speed_ms);
     }
     for (uint8_t i = 64; i < 128; i += step) {
@@ -458,6 +477,10 @@ void color_gradient_corner_effect(void) {
         rotate90Clockwise(out);
 
         let_that_sink_in(out);
+        if(break_flag) {
+
+            return;
+        }
         delay_ms(speed_ms);
     }
     for (uint8_t i = 0; i < 64; i += step) {
@@ -472,6 +495,10 @@ void color_gradient_corner_effect(void) {
         rotate90Clockwise(out);
         rotate90Clockwise(out);
         let_that_sink_in(out);
+        if(break_flag) {
+
+            return;
+        }
         delay_ms(speed_ms);
     }
     for (uint8_t i = 64; i < 128; i += step) {
@@ -488,6 +515,10 @@ void color_gradient_corner_effect(void) {
         rotate90Clockwise(out);
 
         let_that_sink_in(out);
+        if(break_flag) {
+
+            return;
+        }
         delay_ms(speed_ms);
     }
 }
@@ -511,10 +542,10 @@ void draw_frame(int frame[8][8], uint32_t color3, uint32_t color2, uint32_t colo
 
 void cross_animation(void){
 #define SIZE 8
-#define color3 0x400000
-#define color2 0x6000000
-#define color1 0x8000000
-#define speed_mss 5
+#define color1 0x002000
+#define color2 0x004000
+#define color3 0x008000
+#define speed_mss 50
 #define color_bg 0x000002
     int grid[SIZE][SIZE] = {
         {0, 0, 0, 0, 0, 0, 0, 0},
@@ -692,32 +723,88 @@ void cross_animation(void){
         {0, 0, 0, 0, 0, 0, 0, 0}
     };
     draw_frame(frame1, color3, color2, color1);
+    if(break_flag) {
+
+        return;
+    }
     delay_ms(speed_mss);
     draw_frame(frame2, color3, color2, color1);
+    if(break_flag) {
+
+        return;
+    }
     delay_ms(speed_mss);
     draw_frame(frame3, color3, color2, color1);
+    if(break_flag) {
+
+        return;
+    }
     delay_ms(speed_mss);
     draw_frame(frame4, color3, color2, color1);
+    if(break_flag) {
+
+        return;
+    }
     delay_ms(speed_mss);
     draw_frame(frame5, color3, color2, color1);
+    if(break_flag) {
+
+        return;
+    }
     delay_ms(speed_mss);
     draw_frame(frame6, color3, color2, color1);
+    if(break_flag) {
+
+        return;
+    }
     delay_ms(speed_mss);
     draw_frame(frame7, color3, color2, color1);
+    if(break_flag) {
+
+        return;
+    }
     delay_ms(speed_mss);
     draw_frame(frame8, color3, color2, color1);
+    if(break_flag) {
+
+        return;
+    }
     delay_ms(speed_mss);
     draw_frame(frame9, color3, color2, color1);
+    if(break_flag) {
+
+        return;
+    }
     delay_ms(speed_mss);
     draw_frame(frame10, color3, color2, color1);
+    if(break_flag) {
+
+        return;
+    }
     delay_ms(speed_mss);
     draw_frame(frame11, color3, color2, color1);
+    if(break_flag) {
+
+        return;
+    }
     delay_ms(speed_mss);
     draw_frame(frame12, color3, color2, color1);
+    if(break_flag) {
+
+        return;
+    }
     delay_ms(speed_mss);
     draw_frame(frame13, color3, color2, color1);
+    if(break_flag) {
+
+        return;
+    }
     delay_ms(speed_mss);
     draw_frame(frame14, color3, color2, color1);
+    if(break_flag) {
+
+        return;
+    }
     delay_ms(speed_mss);
 
 }

@@ -157,12 +157,7 @@ INTERRUPT_HANDLER(EXTI_PORTD_IRQHandler, 6)
   * @param  None
   * @retval None
   */
-INTERRUPT_HANDLER(EXTI_PORTE_IRQHandler, 7)
-{
-  /* In order to detect unexpected events during development,
-     it is recommended to set a breakpoint on the following instruction.
-  */
-}
+
 #ifdef STM8S903
 /**
   * @brief  External Interrupt PORTF Interrupt routine
