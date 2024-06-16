@@ -545,7 +545,7 @@ void cross_animation(void){
 #define color1 0x002000
 #define color2 0x004000
 #define color3 0x008000
-#define speed_mss 50
+#define speed_mss 100
 #define color_bg 0x000002
     int grid[SIZE][SIZE] = {
         {0, 0, 0, 0, 0, 0, 0, 0},
