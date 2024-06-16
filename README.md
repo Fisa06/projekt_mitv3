@@ -44,13 +44,19 @@ void let_that_sink_in(uint32_t data[64]){
 Při odesílání si rozkouskuje data na jednotlivé bity a postupne podle nich zapisuje do registru pro tim1 
 který na jejich zakladě generuje singlepulzy reprezentující 1/0 na onewire sběrnici pro WS2812B.
 Každá led má buffer na 24bit => do ní zapisujeme barvu ve formátu  GRB `0xff00ff` každé dva digity reprezentují intenzitu jedné barvy.
-  
+
+
+Flow chart přepínání jednotlivých módů
 ------------------------------------
+<div style="background-color: white; display: inline-block; padding: 10px;">
+    <img src="./images/schema.svg" alt="Example Image" width="350">
+</div>
 
 
-#### SDCC
- nřbn
-#### SDCC-gas
+Schéma
+
+------------------------------------
+<img src="./images/diagram.svg" alt="Example Image" width="350">
 
 [SDCC-gas](https://github.com/XaviDCR92/sdcc-gas) vzniklo, aby vyřešilo problém
 optimalizace mrtvého kódu přidáním podpory [GNU
