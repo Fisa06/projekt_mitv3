@@ -10,6 +10,7 @@
 #include "neopixel.h"
 #include "animations.h"
 #include "conway.h"
+#define SIZE 8
 volatile bool break_flag = 0;
 
 
@@ -21,92 +22,9 @@ void in_it(){
     GPIO_Init(BTN_PORT, BTN_PIN, GPIO_MODE_IN_FL_IT);
 }
 
-void hihi(void){
-    uint32_t grid1[64] = {0};
-    uint32_t result[64];
-    for(uint8_t i = 1; i < 128; i+=2){
-        // Example usage
-        grid1[0] = _merge(0,0,i);  // Top-left corner, green
-        grid1[63] = 0x008000; // Bottom-right corner, blue
-
-        generate_diagonal_gradient(grid1, result);
-        let_that_sink_in(result);
-        delay_ms(25);}
-    for(uint8_t i = 0; i < 128; i+=2){
-        // Example usage
-        grid1[0] = _merge(0,0,(127-i));  // Top-left corner, green
-        grid1[63] = 0x008000; // Bottom-right corner, blue
-
-        generate_diagonal_gradient(grid1, result);
-        let_that_sink_in(result);
-        delay_ms(25);
-    }
-    for(uint8_t i = 0; i < 128; i+=2){
-        // Example usage
-        grid1[0] = _merge(0,127,0);  // Top-left corner, green
-        grid1[63] = _merge(0,0,(127-i)); // Bottom-right corner, blue
-
-        generate_diagonal_gradient(grid1, result);
-        let_that_sink_in(result);
-        delay_ms(25);
-    }
-
-    for(uint8_t i = 1; i < 128; i+=2){
-        // Example usage
-        grid1[0] = _merge(0,0,127);  // Top-left corner, green
-        grid1[63] = _merge(0,i,0); // Bottom-right corner, blue
-
-        generate_diagonal_gradient(grid1, result);
-        let_that_sink_in(result);
-        delay_ms(25);}
-
-
-
-    for(uint8_t i = 0; i < 128; i+=2){
-        // Example usage
-        grid1[0] = _merge(0,0,(127-i));  // Top-left corner, green
-        grid1[63] = 0x008000; // Bottom-right corner, blue
-
-        generate_diagonal_gradient(grid1, result);
-        let_that_sink_in(result);
-        delay_ms(25);
-
-    }
-    for(uint8_t i = 1; i < 128; i+=2){
-        // Example usage
-        grid1[0] = _merge(0,0,i);  // Top-left corner, green
-        grid1[63] = 0x008000; // Bottom-right corner, blue
-
-        generate_diagonal_gradient(grid1, result);
-        let_that_sink_in(result);
-        delay_ms(25);}
-
-}
-
-bool is_btn_pressed_event(void) // returns true if button one is pressed but not when it is hold
-{
-    static bool last_state = false;
-    bool state = GPIO_ReadInputPin(BTN_PORT, BTN_PIN) == RESET;
-    bool event = state && !last_state;
-    last_state = state;
-    return event;
-}
 void main(void) {
     in_it();
-#define SIZE 8
 
-    // let_that_sink_in(values);
-
-    // let_that_sink_in(out);
-    // delay_ms(1);
-    // let_that_sink_in(out2);
-    // delay_ms(1);
-    // let_that_sink_in(out3);
-    // delay_ms(1);
-    // color_fill_with_reverse_horizontal();
-    // color_fill_with_reverse_vertical();
-
-    // fill_with_color_hex(0xffffff, 64);
     uint32_t time = 0;
 
     uint8_t state = 0;
@@ -195,37 +113,6 @@ INTERRUPT_HANDLER(EXTI_PORTE_IRQHandler, 7)
 {
   break_flag = 1;
 }
-
-    /*
-
-
-
-
-
-
-
-
-
-
-
-
-
-        for (uint8_t i = 0; i < 20; i++) {
-            grid_to_1d_array(grid, array, color, color_bg);
-            let_that_sink_in(array);
-            update_grid(grid);
-            delay_ms(250);
-
-
-
-*/
-
-
-
-
-
-//-----------------------------------------------------------------
-
 
 
 
