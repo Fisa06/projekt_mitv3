@@ -1,6 +1,15 @@
 Neopixel displa( 64x WS2812B )
 ==============================
 
+Zadání
+------------------------------------
+Animace na Neopixel dipleji x64 
+- komunikace s displejem
+- barevné přechody
+- renderování po framech
+- conways game of life
+- pulzování do hudby (nedokončeno)
+
 
 Komunikace s displejem
 ------------------------------------
@@ -17,6 +26,8 @@ void init_tim(void){
     TIM1_SelectOnePulseMode(TIM1_OPMODE_SINGLE); // Selecting One Pulse Mode
 }
 ```
+Hlavním nastavením je ` TIM1_SelectOnePulseMode(TIM1_OPMODE_SINGLE)` kteý nastavý OPM pro TIM1 a ten pak místo konstantního pulzování posílá jen pulz zapsaný v registu.
+
 ```c
 void let_that_sink_in(uint32_t data[64]){
 
@@ -48,116 +59,182 @@ Každá led má buffer na 24bit => do ní zapisujeme barvu ve formátu  GRB `0xf
 
 Flow chart přepínání jednotlivých módů
 ------------------------------------
-<div style="background-color: white; display: inline-block; padding: 10px;">
-    <img src="./images/schema.svg" alt="Example Image" width="350">
-</div>
+
+<img src="./images/diagram.svg" alt="Example Image" width="250">
 
 
-Schéma
+Schéma zapojení
 
 ------------------------------------
-<img src="./images/diagram.svg" alt="Example Image" width="350">
 
-[SDCC-gas](https://github.com/XaviDCR92/sdcc-gas) vzniklo, aby vyřešilo problém
-optimalizace mrtvého kódu přidáním podpory [GNU
-Assembleru](https://cs.wikipedia.org/wiki/GNU_Assembler) tedy *gas* do SDCC
-3.9.0. [gas](https://codedocs.org/what-is/gnu-assembler) je výhodou i nevýhodou
-tohoto řešení. Na jednu stranu to znamená, že můžeme používat klasické nástroje
-z [GNU binutils](https://cs.wikipedia.org/wiki/GNU_binutils), na druhou stranu
-to znamená, že nelze použít ty části sdcc-libraries, které jsou napsané v STM8
-assembleru a je nutné použít méně optimální kód napsaný v C nebo STM8 assembler
-přepsat do GNU assembleru.
+<img src="./images/schema.svg" alt="Example Image" width="2000">
 
-#### sdccrm
+#### Animace
 
-Toto řešení je jen jakýsi historický pozůstatek a v 99% případů ho
-nepotřebujete a nechcete použít.
+Všechny animace jsou v souboru [animations.c](./src/animations.c)
 
-[sdccrm](https://github.com/XaviDCR92/sdccrm) je nástroj pro optimalizaci
-mrtvého kódu vytvořeného SDCC, který odstraňuje nepoužívané funkce. Kód se
-nejprve zkompiluje do assembleru klasickým SDCC, poté se pomocí sdccrm vymaže
-kód, který se nepoužívá, celý proces se dokončí a kód se převede z assembleru
-do strojového kódu. Z logiky věci toto řešení vylučuje použití debugeru.
+```c
+void color_gradient_corner_effect(void) {
+    uint8_t i_red = 0;
+    uint8_t i_green = 0;
+    uint8_t i_blue = 0;
 
-Dále **je nutné** ručně zadat/editovat funkce, které nechcete optimalizovat –-
-tedy vyhodit. Proto je třeba sledovat chybová hlášení a název chybějící funkce
-zadat do souboru `exclude_reference` uvnitř projektového adresáře.
+#define speed_ms 1
+#define step 2
+#define red_offset -30
+#define green_offset 0
+#define blue_offset 0
 
+    // hihi();
+    uint32_t values[64] = {0};
+    uint32_t out[64];
 
+    for (uint8_t i = 0; i < 64; i += step) {
+        values[63] =
+            _merge((i + red_offset) < 0 ? 0 : (i + red_offset), 0, (127 - i));
+        values[0] = _merge(
+            (127 - i + red_offset) < 0 ? 0 : (127 - i + red_offset), 0, i);
 
-Použití
---------------
+        generate_diagonal_gradient(values, out);
 
-Nejprve je třeba v `Makefile` správně nastavit µprocesor a jeho frakvenci;
-případně cestu k instalaci SDCC
-[STVP](https://www.st.com/en/development-tools/stvp-stm8.html).
+        let_that_sink_in(out);
+        if(break_flag) {
+            return;
+        }
+        delay_ms(speed_ms);
+    }
+    for (uint8_t i = 64; i < 128; i += step) {
 
-```make
-#DEVICE_FLASH=stm8s103f3
-DEVICE_FLASH=stm8s208rb
+        values[63] = _merge(
+            (127 - i + red_offset) < 0 ? 0 : (127 - i + red_offset), 0, i);
+        values[0] =
+            _merge((i + red_offset) < 0 ? 0 : (i + red_offset), 0, (127 - i));
 
-### STlink version for falsh2 targer (stm8flash program)
-#STLINK=stlinkv2
-#STLINK=stlink
-STLINK=stlinkv21
+        generate_diagonal_gradient(values, out);
+        rotate90Clockwise(out);
 
-F_CPU=16000000
+        let_that_sink_in(out);
+        if(break_flag) {
 
-ifeq ($(OS),Windows_NT)
-	CC_ROOT = "/c/Program Files/SDCC"
-	STVP_ROOT = "/c/Program Files (x86)/STMicroelectronics/st_toolset/stvp"
-else
-	CC_ROOT = /usr
-endif
+            return;
+        }
+        delay_ms(speed_ms);
+    }
+    for (uint8_t i = 0; i < 64; i += step) {
+
+        values[63] =
+            _merge((i + red_offset) < 0 ? 0 : (i + red_offset), 0, (127 - i));
+        values[0] = _merge(
+            (127 - i + red_offset) < 0 ? 0 : (127 - i + red_offset), 0, i);
+
+        generate_diagonal_gradient(values, out);
+        rotate90Clockwise(out);
+        let_that_sink_in(out);
+        if(break_flag) {
+
+            return;
+        }
+        delay_ms(speed_ms);
+    }
+    for (uint8_t i = 64; i < 128; i += step) {
+
+        values[63] = _merge(
+            (127 - i + red_offset) < 0 ? 0 : (127 - i + red_offset), 0, i);
+        values[0] =
+            _merge((i + red_offset) < 0 ? 0 : (i + red_offset), 0, (127 - i));
+
+        generate_diagonal_gradient(values, out);
+        rotate90Clockwise(out);
+        rotate90Clockwise(out);
+
+        let_that_sink_in(out);
+        if(break_flag) {
+
+            return;
+        }
+        delay_ms(speed_ms);
+    }
+    for (uint8_t i = 0; i < 64; i += step) {
+
+        values[63] =
+            _merge((i + red_offset) < 0 ? 0 : (i + red_offset), 0, (127 - i));
+        values[0] = _merge(
+            (127 - i + red_offset) < 0 ? 0 : (127 - i + red_offset), 0, i);
+
+        generate_diagonal_gradient(values, out);
+        rotate90Clockwise(out);
+        rotate90Clockwise(out);
+        let_that_sink_in(out);
+        if(break_flag) {
+
+            return;
+        }
+        delay_ms(speed_ms);
+    }
+    for (uint8_t i = 64; i < 128; i += step) {
+
+        values[63] = _merge(
+            (127 - i + red_offset) < 0 ? 0 : (127 - i + red_offset), 0, i);
+        values[0] =
+            _merge((i + red_offset) < 0 ? 0 : (i + red_offset), 0, (127 - i));
+
+        generate_diagonal_gradient(values, out);
+        rotate90Clockwise(out);
+        rotate90Clockwise(out);
+        rotate90Clockwise(out);
+
+        let_that_sink_in(out);
+        if(break_flag) {
+
+            return;
+        }
+        delay_ms(speed_ms);
+    }
+    for (uint8_t i = 0; i < 64; i += step) {
+
+        values[63] =
+            _merge((i + red_offset) < 0 ? 0 : (i + red_offset), 0, (127 - i));
+        values[0] = _merge(
+            (127 - i + red_offset) < 0 ? 0 : (127 - i + red_offset), 0, i);
+
+        generate_diagonal_gradient(values, out);
+        rotate90Clockwise(out);
+        rotate90Clockwise(out);
+        rotate90Clockwise(out);
+        let_that_sink_in(out);
+        if(break_flag) {
+
+            return;
+        }
+        delay_ms(speed_ms);
+    }
+    for (uint8_t i = 64; i < 128; i += step) {
+
+        values[63] = _merge(
+            (127 - i + red_offset) < 0 ? 0 : (127 - i + red_offset), 0, i);
+        values[0] =
+            _merge((i + red_offset) < 0 ? 0 : (i + red_offset), 0, (127 - i));
+
+        generate_diagonal_gradient(values, out);
+        rotate90Clockwise(out);
+        rotate90Clockwise(out);
+        rotate90Clockwise(out);
+        rotate90Clockwise(out);
+
+        let_that_sink_in(out);
+        if(break_flag) {
+
+            return;
+        }
+        delay_ms(speed_ms);
+    }
+}
 ```
-
-Pokud používáte `sdccrm` je ještě potřebné v `Makefile` odkomentovat nebo
-zakomentovat nebo přidat ty části SPL knihovny, které zrovna (ne)používáte.
-
-```make
-SPL_SOURCE  = stm8s_gpio.c stm8s_clk.c stm8s_tim4.c stm8s_itc.c 
-SPL_SOURCE += stm8s_uart1.c
-#SPL_SOURCE += stm8s_adc2.c
-#SPL_SOURCE += stm8s_tim1.c
-SPL_SOURCE += stm8s_tim2.c
-#SPL_SOURCE += stm8s_tim3.c
-```
-
-... no a potom už jen bastlíte, programujete a voláte `make`.
-
-Pokud používáte `sdcc-gas` budete možná muset vytvořit pro váš µprocesor
-linker-script. Jsou to soubory s příponou `*.x` v adresáři `.make`. Tento
-toolchain *zatím* obsahuje pouze linker-scripty pro µprocesory:  `stm8s003f3`,
-`stm8s103f3` a `stm8s208rb`. Pokud tak učiníte, jistě mi jej zašlete k zařazení
-do tohoto toolchainu.
-
-| příkaz&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;||
-|:---------- |:--------------------------- |
-| `make spl` | stáhne a nachystá knihovny |
-| `make` | provede kompilaci |
-| `make flash` | nahraje program do chipu. Na Linuxu se použije [OpenOCD](https://openocd.org/). Na Windows se použije [STVP](https://www.st.com/en/development-tools/stvp-stm8.html) verze pro příkazový řádek.|
-| `make flash2` | záložní varianta, protože OpenOCD někdy nechce čip naprogramovat (používá [stm8flash](https://github.com/vdudouyt/stm8flash)).
-| `make clean` | smaže všechno, co nakompiloval
-| `make rebuild` | smaže vše a znovu zkompiluje
-| `make openocd` | pustí `openocd` pro debug
-| `make debug` | spustí STM8-gdb
 
 
 Závislosti
 ---------------
 
-* [GNU Make](https://www.gnu.org/software/make/)
-* [GNU Bash](https://www.gnu.org/software/bash/) -- ten se na Windows
-  dá nainstalovat společně s [Git](https://git-scm.com/download/win)em.
-* [SDCC](http://sdcc.sourceforge.net/)
-  nebo [SDCC-gas](https://github.com/XaviDCR92/sdcc-gas)
-* [STM8 binutils](https://stm8-binutils-gdb.sourceforge.io) (`stm8-gdb`, `stm8-ln`)
-* [OpenOCD](https://openocd.org/) pro `flash` a `debug`
-  nebo [STVP](https://www.st.com/en/development-tools/stvp-stm8.html)
-  pro `flash` na Windows.
-* ([stm8flash](https://github.com/vdudouyt/stm8flash) pro `flash2`)
+* [STM8-toolchain]([https://github.com/vdudouyt/stm8flash](https://gitlab.com/spseol/mit-no/STM8S-toolchain)
 
-### Na Windows
-
-[`choco`](https://chocolatey.org/)` install git make vscode mingw`
 
