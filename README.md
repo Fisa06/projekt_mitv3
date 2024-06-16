@@ -1,60 +1,55 @@
-STM8 (SPŠE) toolchain
+Neopixel displa( 64x WS2812B )
 ==============================
 
-* Toto je startovací strom zdrojových kódů a `Makefile` pro výuku Mikroprocesorové
-  techniky
-  s [STM8S](https://www.st.com/en/microcontrollers-microprocessors/stm8s-series.html).
-* Strom je určen pro překladač [SDCC](http://sdcc.sourceforge.net/) nebo 
-  [SDCC-gas](https://github.com/XaviDCR92/sdcc-gas).
-* Standardní knihovna pro práci s periferiemi 
-  [SPL](https://www.st.com/content/st_com/en/products/embedded-software/mcu-mpu-embedded-software/stm8-embedded-software/stsw-stm8069.html)
-  by měla být (z licenčních důvodů) stáhnou zvlášť ze stránek výrobce a použít
-  [patch](https://github.com/gicking/STM8-SPL_SDCC_patch) -- napište `make spl`.
-* Konkurence a inspirace: \
-  * <https://gitlab.com/wykys/stm8-tools>
-  * <https://github.com/matejkrenek/stm8-toolchain>
 
-Tři mejkfaily pro studenta
+Komunikace s displejem
 ------------------------------------
 
-K dispozici jsou celkem tři `Makefile` v adresáři `.make`. Na začátku si musíte
-jeden z nich vybrat:
-
-```bash
-make sdcc       # nebo
-make sdcc-gas   # nebo
-make sdccrm     # nebo
+```c
+void init_tim(void){
+    GPIO_Init(GPIOC,GPIO_PIN_1,GPIO_MODE_OUT_PP_LOW_FAST); // PC1 (TIM1_CH1)
+    TIM1_TimeBaseInit(0, TIM1_COUNTERMODE_UP, 15, 0); // Upcounting, prescaler 0, dont care period/ARR value
+    // OC1 as output with Polarity High in PWM2 mode (OC1N not used)
+    TIM1_OC1Init(TIM1_OCMODE_PWM2, TIM1_OUTPUTSTATE_ENABLE, TIM1_OUTPUTNSTATE_DISABLE,
+                 1, TIM1_OCPOLARITY_HIGH, TIM1_OCNPOLARITY_HIGH, TIM1_OCIDLESTATE_SET,
+                 TIM1_OCNIDLESTATE_RESET);
+    TIM1_CtrlPWMOutputs(ENABLE); // Timer output global enable
+    TIM1_SelectOnePulseMode(TIM1_OPMODE_SINGLE); // Selecting One Pulse Mode
+}
 ```
+```c
+void let_that_sink_in(uint32_t data[64]){
 
-**Pokud si nejste jistí, co vybrat, vyberte si `sdcc`** a napište
-```bash
-make sdcc
+    uint8_t length = 64;
+    uint32_t mask;
+    disableInterrupts(); // can be omitted if interrupts do not take more then about ~25us
+    while(length){   // for all bytes from input array
+        length--;
+        mask=0b100000000000000000000000; // for all bits in byte
+        while(mask){
+            while(TIM1->CR1 & TIM1_CR1_CEN); // wait if timer run (transmitting last bit)
+            if(mask & data[length]){ // send pulse with coresponding length ("L" od "H")
+                TIM1->ARRL = H_PULSE; // set pulse width for "H" bit
+            }else{
+                TIM1->ARRL = L_PULSE; // set pulse width for "L" bit
+            }
+            TIM1->CR1 |= TIM1_CR1_CEN; // Start timer (start single pulse generation)
+            mask = mask >> 1;
+        }
+    }
+
+    enableInterrupts();
+}
 ```
+Při odesílání si rozkouskuje data na jednotlivé bity a postupne podle nich zapisuje do registru pro tim1 
+který na jejich zakladě generuje singlepulzy reprezentující 1/0 na onewire sběrnici pro WS2812B.
+Každá led má buffer na 24bit => do ní zapisujeme barvu ve formátu  GRB `0xff00ff` každé dva digity reprezentují intenzitu jedné barvy.
+  
+------------------------------------
 
-Potom můžete mezi nimi přepínat:
-
-    make switch-sdcc
-    make switch-sdcc-gas
-    make switch-sdccrm
-
-Přepnutí jen znamená, že se udělá symlink do root-adresáře projektu. Na divných
-systémech, které symlinky neumí (například Windows) se natvrdo kopíruje, takže
-tato operace může být ztrátová. Na normálních systémech (asi všechny, kromě
-Windows) je tato operace bezztrátová.
-
-
-### Který `Makefile` vybrat?
-
-Detailní popis najdete na <https://chytrosti.marrek.cz/stm8oss.html>.
 
 #### SDCC
-
-Z hlediska STM8 má [SDCC](http://sdcc.sourceforge.net/) jednu zásadní nevýhodu:
-nedokáže odstranit mrtvý nepoužívaný kód. To může zapříčinit velké binární
-soubory plné nepoužívaného kódu. Pokud nepoužíváte knihovny 3. stran
-asi vám to nevadí. U SPL je tato nevýhoda vyřešena použitím 
-[SPL rozdělené na malé soubory](https://gitlab.com/spseol/mit-no/spl/-/tree/main/SPLSPL).
-
+ nřbn
 #### SDCC-gas
 
 [SDCC-gas](https://github.com/XaviDCR92/sdcc-gas) vzniklo, aby vyřešilo problém
