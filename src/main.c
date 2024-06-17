@@ -100,10 +100,11 @@ void main(void) {
                         break;
                     }
                 }
-                state = 0;
-                break_flag = 0;
-                break;
+
             }
+            state = 0;
+            break_flag = 0;
+            break;
         }
     }
 }
