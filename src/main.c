@@ -15,7 +15,7 @@ volatile bool break_flag = 0;
 
 
 
-void in_it(){
+void in_it(){                                      // incializace MCU a periferii
     CLK_HSIPrescalerConfig(CLK_PRESCALER_HSIDIV1); // 16MHz from internal RC
     init_milis(); // millis using TIM4 - not necessary
     init_tim();
@@ -31,7 +31,7 @@ void main(void) {
     while (1) {
 
         switch (state) {
-        case 0:
+        case 0:                                   //case 0 - 2 full color fill test
             while (break_flag == 0) {
                 fill_with_color_hex(0x008000, 64);
                 delay_ms(100);
@@ -56,7 +56,7 @@ void main(void) {
             state = 3;
             break_flag = 0;
             break;
-        case 3:
+        case 3:                                //Color animation
             while (break_flag == 0) {
                 color_gradient_corner_effect();
             }
@@ -67,12 +67,12 @@ void main(void) {
         case 4:
 
             while (break_flag == 0) {
-                cross_animation();
+                cross_animation();              //Animated cross
             }
             state = 5;
             break_flag = 0;
             break;
-        case 5:
+        case 5:                                             //conways game of life
             while (break_flag == 0) {
                 int grid[SIZE][SIZE] = {
                     {0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0},
@@ -110,7 +110,7 @@ void main(void) {
 }
 
 
-INTERRUPT_HANDLER(EXTI_PORTE_IRQHandler, 7)
+INTERRUPT_HANDLER(EXTI_PORTE_IRQHandler, 7)    // handles change of cases
 {
   break_flag = 1;
 }
